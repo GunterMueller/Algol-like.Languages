@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- mode: python -*- coding: utf-8 -*-
+"""
+Algol 60 Interpreter in Python (2.3.5 - 3.0.1) by (鈴) at Oki Software
+
+URL: http://www.okisoft.co.jp/esc/ply-algol/
+License: see ../lib/algol60/Copyright.txt
+Last Revised: H21.2/16
+"""
+
+import os, sys
+__version__ = "0.7"
+
+if len(sys.argv) != 2:
+    sys.stderr.write("algol60 %s in python %d.%d.%d\n" %
+                     ((__version__,) + sys.version_info[:3]))
+    sys.stderr.write("usage: algol60 source_file_name\n")
+    sys.stderr.write("       algol60 - < source_file_name\n")
+    sys.exit(1)
+
+prog = sys.argv[0]
+prog_path = os.path.dirname(prog)
+for lib_name in "ply-3.0", "algol60":
+    lib_path = os.path.join(prog_path, "..", "lib", lib_name)
+    lib_path = os.path.abspath(lib_path)
+    sys.path.insert(0, lib_path)
+
+try:
+    import psyco
+    psyco.full()
+except ImportError:
+    pass
+
+from Parser import Parser, SyntaxError, SemanticsError
+from Interpreter import Interpreter
+parser = Parser(debug=False)
+interp = Interpreter(parser)
+
+if sys.argv[1] == "-":
+    source_text = sys.stdin.read()
+else:
+    file_name = sys.argv[1]
+    fpath = os.path.abspath(file_name)
+    rf = open(file_name)
+    try:
+        source_text = rf.read()
+    finally:
+        rf.close()
+
+try:
+    os.chdir(lib_path)
+    interp.run(source_text)
+except (SyntaxError, SemanticsError):
+    ex = sys.exc_info()[1]
+    sys.stderr.write("%s: %s\n" % (ex.__class__.__name__, ex))
+    sys.exit(1)

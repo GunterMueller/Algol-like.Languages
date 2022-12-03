@@ -1,0 +1,690 @@
+;    SALIB.MAC   ---- file to expand S-code instructions
+;                     into 80286 instructions
+;     assume bp is the sf register
+.287
+.8086
+reallen    equ 4 ; length in words
+ptrstacklen equ 8
+ptrstackbytes equ 16
+cseg segment para 'CODE'
+
+   jmp _samain
+cseg ends
+;_DATA segment para 'DATA'
+;linker dw 0,0
+;_PIDREG dd 0,0,0,0,0
+;_REALREG dw 0,0,0,0
+;_LINENUMBER dw 0
+
+;public _LINENUMBER
+;public _PIDREG
+;public _REALREG
+;_DATA ends
+getlev    macro
+          mov si,[bp+#1]
+          #em
+enterframe macro
+           push bp
+           push bx
+           #em
+exitframe  macro
+           pop bx
+           pop bp
+           #em
+outbyte    macro
+           ; takes (file,selector,char ->file)
+           pop ax   ; char to write
+           pop dx   ; byte to write
+		   pop cx   ; file
+                   push cx  ; leave copy on stack
+		   push bx  ; save bx
+           mov bx,cx
+           mov cx,1
+           push ax  ; write  from memory buffer
+           add dx,sp; ds:dx points at byte to write
+           mov ah,40h
+           int 21h
+           pop ax   ; discard written char
+		   pop bx
+           #em
+
+prolog286     macro
+           enter 0,#1
+
+           #em
+
+prolog86	macro
+		   push bp
+		   mov di,bp
+		   mov bp,sp
+		   #em
+pushdisp   macro
+		   sub di,2
+	       push ss:[di]
+		   #em
+
+prolog     macro
+           prolog286 #1
+		   #em
+shrink     macro
+           ; release memory at start of program
+           mov ah,4ah
+           mov bx,1000h   ; keep one whole segment
+           int 21h
+           #em
+epilog     macro
+;           leave
+		   mov sp,bp
+		   pop bp
+           retf #1
+           #em
+formclos   macro
+           push cs
+           mov ax, offset #1
+           push ax
+           #em
+call_static macro
+            ; call a proc in same segment
+            push cs
+            mov ax, offset #1
+            call ax
+            #em
+
+start_paramsi macro
+               push ax
+             #em
+start_paramsv macro
+             #em
+start_paramsr macro
+              sub sp,reallen
+              #em
+start_paramsp macro sub sp, ptrstacklen #em
+call_glob macro
+          db 36h   ; seg ss
+          db 0ffh  ; call far
+          db 9fh   ; [bx+offset]
+          dw #1
+           #em
+call_loc macro
+           db 0ffh ; call far
+           db 9eh  ; indirect [bp+procvar]
+           dw   #1
+           #em
+call_ macro
+          getlev #1
+          call far ss:[si+#2]
+          #em
+llint    macro
+         mov ax,#1
+          push ax
+;   push #1
+          #em
+pushreal  macro         ; assume ss:si points at the real
+          push [si+6]
+		  push [si+4]
+		  push [si+2]
+		  push [si]
+;          push ss:[si+6]
+;		  push ss:[si+4]
+;		  push ss:[si+2]
+;		  push ss:[si]
+          #em
+
+pushproc  macro
+          push [si+2]
+          push [si]
+          #em
+pushp     macro         ; assume ss:si points at the ptr
+          add sp,-ptrstackbytes
+		  mov di,ss
+;		  mov ax,ds
+		  mov es,di
+;		  mov ds,di
+          mov di,sp
+          mov cx,ptrstacklen      ; length
+          rep  movsw
+;		  mov ds,ax
+          #em
+
+heappushreal  macro         ; assume dx:si points at the real on heap
+
+          add sp,-8
+          mov di,sp
+          push ss
+          pop es
+          mov cx,reallen      ; length
+          mov ax,ds           ; save ds
+          mov ds,dx           ; point at heap
+          rep  movsw
+          mov ds,ax           ; point back at  Data
+          #em
+ heappushp     macro         ; assume dx:si points at the ptr
+
+          add sp,-ptrstackbytes
+          mov di,sp
+          push ss
+          pop es
+          mov cx,ptrstacklen      ; length
+          mov ax,ds           ; save ds
+          mov ds,dx           ; point at heap
+          rep  movsw
+          mov ds,ax           ; point back at  Data
+          #em
+
+popreal   macro    ; assume ss:di points at real var
+	      pop [di]
+          pop [di+2]
+		  pop [di+4]
+		  pop [di+6]
+;	      pop ss:[di]
+ ;         pop ss:[di+2]
+	;	  pop ss:[di+4]
+		;  pop ss:[di+6]
+          #em
+
+popproc   macro
+          pop [di]
+          pop [di+2]
+          #em
+
+
+popp      macro    ; assume ss:di points at pntr var
+          mov si,sp
+		  push ds
+          pop es
+          mov cx,ptrstacklen
+          rep movsw
+          add sp,ptrstackbytes
+          #em
+
+heappopreal   macro    ; assume dx:di points at real field on heap
+          mov es,dx
+		  pop es:[di]
+		  pop es:[di+2]
+		  pop es:[di+4]
+		  pop es:[di+6]
+          #em
+
+
+heappopp      macro   ; dx:di points at pntr field on heap
+          mov si,sp
+          mov es,dx
+          mov cx,ptrstacklen
+          rep movsw
+          add sp,ptrstackbytes
+          #em
+
+movp      macro    ; move a pointer on the stack
+          mov si,sp
+          add si,ptrstackbytes  -2
+          add di,ptrstackbytes-2
+          std
+          push ss
+          pop es
+          mov cx,ptrstacklen
+;		  mov ax,ds
+;		  push ss
+;		  pop ds
+          rep movsw
+;		  mov ds,ax
+          cld
+          #em
+movr      macro
+          mov si,sp
+          add si,6
+          add di,6
+          std
+          push ss
+          pop es
+          mov cx,reallen
+;		  mov ax,ds
+;		  push ss
+;		  pop ds
+          rep movsw
+;		  mov ds,ax
+          cld
+          #em
+ldssi     macro
+
+          mov ax,cs
+          mov ds,ax
+          lea si, #1
+          #em
+pushfarpntr macro
+			push cs
+
+            mov ax,offset #1
+			push ax
+            #em
+sspushfarpntr macro
+			push ss
+
+            mov ax,offset #1
+			push ax
+            #em
+llreal_op    macro
+          ldssi #1
+
+          push [si+6]
+		  push [si+4]
+		  push [si+2]
+		  push [si]
+		  push ss
+		  pop ds
+          #em
+globali  macro
+          push ss:[#1+bx]
+          #em
+globaladdr macro
+         lea ax,[#1+bx]
+         push ss
+         push ax
+         #em
+globalp macro
+        lea si,[#1+bx]
+        pushp
+        #em
+globalproc macro
+        lea si,[#1+bx]
+        pushproc
+        #em
+globalr macro
+        lea si,[#1+bx]
+        pushreal
+        #em
+locali     macro
+          push [bp + #1]
+          #em
+localaddr macro
+           lea ax, [bp+ #1]
+           push ss
+           push ax
+           #em
+localp    macro
+          lea si,[bp+#1]
+          pushp
+          #em
+localproc    macro
+          lea si,[bp+#1]
+          pushproc
+          #em
+localr    macro
+          lea si,[bp+#1]
+          pushreal
+          #em
+loadi    macro
+          getlev #1
+          push ss:[si+#2]
+          #em
+loadaddr macro
+         getlev #1
+         add si,#2
+         push ss
+         push si
+         #em
+loadr     macro
+          getlev #1
+          lea si,[#2+si]
+          pushreal
+          #em
+loadp     macro
+          getlev #1
+          lea si,[#2+si]
+          pushp
+          #em
+loadproc     macro
+          getlev #1
+          lea si,[#2+si]
+          pushproc
+          #em
+assi     macro
+          getlev #1
+          pop [si+#2]
+          #em
+assr      macro
+          getlev #1
+          lea di,[si+#2]
+          popreal
+          #em
+assp      macro
+          getlev #1
+          lea di,[si+#2]
+          popp
+          #em
+
+globalassi  macro
+          pop ss:[#1+bx]
+          #em
+globalassr macro
+          lea  di,[#1+bx]
+          popreal
+          #em
+globalassp macro
+           lea di,[#1+bx]
+           popp
+           #em
+localassi  macro
+          pop [bp + #1 ]
+          #em
+localassproc  macro
+          lea di, [bp + #1 ]
+          popproc
+          #em
+localassr macro
+          lea di,[bp+#1]
+          popreal
+          #em
+localassp macro
+          lea di,[#1+bp]
+          popp
+          #em
+localmovi  macro              ; move top of stack without popping
+          pop ax
+          push ax
+          mov  [bp + #1 ]  ,ax
+          #em
+localmovr macro
+          lea di,[bp+#1]
+          movr
+          #em
+localmovp macro
+          lea di,[#1+bp]
+          movp
+          #em
+discard_globali macro
+          add sp,#1
+
+
+          #em
+neg_op     macro
+          pop ax
+          neg ax
+          push ax
+          #em
+band      macro
+          pop cx
+          pop ax
+          and ax,cx
+          push ax
+          #em
+bor       macro
+          pop cx
+          pop ax
+          or ax,cx
+          push ax
+          #em
+shiftr    macro
+          pop cx
+          pop ax
+          shr ax,cl
+          push ax
+          #em
+
+shiftl    macro
+          pop cx
+          pop ax
+          shl ax,cl
+          push ax
+          #em
+
+plusop    macro
+          pop cx
+          pop ax
+          add ax,cx
+          push ax
+          #em
+not_op    macro
+          pop ax
+          xor ax,1
+          push ax
+          #em
+minusop   macro
+          pop cx
+          pop ax
+          sub ax,cx
+          push ax
+          #em
+multop    macro
+          pop cx
+          pop ax
+          imul cx
+          push ax
+          #em
+divop     macro
+          pop cx
+          pop ax
+          cwd
+          idiv cx
+          push ax
+          #em
+remop     macro
+          pop cx
+          pop ax
+          cwd
+          idiv cx
+          push dx
+          #em
+cmpop macro
+          pop cx
+          pop ax
+          cmp ax,cx
+          #em
+
+jump   macro
+          jmp #1
+          #em
+
+jumpt     macro
+          pop ax
+          or ax,ax
+          jz m1
+          jump #1
+
+m1        equ $
+          #em
+jumptt    macro
+          pop ax
+          push ax
+          or ax,ax
+          jz m1
+          jump #1
+
+m1        equ $
+          pop ax
+          #em
+cjump     macro
+          pop cx
+          pop ax
+          push ax
+          cmp ax,cx
+          jnz >m1
+          pop ax
+          jmp #1
+  m1       equ $
+          #em
+fortest   macro
+          pop cx; pop the increment
+          pop dx; pop the limit
+          pop ax; pop i
+          cmp cx,0
+          jl >m1 ; increment neg
+          cmp ax,dx; increment pos
+		  jle >m2
+    m3    equ $
+		  jmp #1 ; exit if i ge limit
+
+    m1    equ $
+          cmp ax,dx; inc neg
+          jge >m2
+		  jmp  m3
+    m2    equ $
+          push ax
+          push dx
+          push cx
+          #em
+forstep   macro
+          pop cx; pop the increment
+          pop dx; pop the limit
+          pop ax; pop i
+          add ax,cx
+          push ax
+          push dx
+          push cx
+          jmp #1
+          #em
+
+forprep macro
+           pop cx
+           pop ax
+           push ax
+           sub cx,ax
+           add cx,2
+           #em
+minfortest macro
+           loop >m1
+           pop ax
+           jmp #1
+  m1       equ $
+           push cx
+           #em
+minforstep macro
+           pop cx
+           pop ax
+           inc ax
+           push ax
+           jmp #1
+           #em
+
+
+start_write macro
+            mov ax,1
+            push ax
+            #em
+end_write   macro
+            pop ax
+            #em
+            ;------------------------------- Calls to C library
+calld       macro
+            push bx
+            call #1
+            pop bx
+            #em
+callc       macro
+            push bx
+	        int 18h               ; use int 18h for dynamic linking
+            db '#1',0
+            pop bx
+            #em
+writeint    macro
+            callc _writei
+            #em
+writestring macro
+            callc _writes
+            #em
+writepntr   macro
+			callc _writep
+			#em
+writebool	macro
+			callc _writeb
+            #em
+
+writereal   macro
+            callc _writer
+            #em
+writecint   macro
+            _writeint
+            #em
+makevec_op     macro
+          callc _makevec
+          #em
+subv_opi macro
+          callc _subvib
+          #em
+subvass_opi macro
+             callc _subvassib
+             #em
+
+subv_opr macro
+          callc _subvr
+          #em
+subvass_opr macro
+             callc _subvassr
+             #em
+
+subv_opp macro
+          callc _subvp
+          #em
+subvass_opp macro
+            callc _subvassp
+            #em
+cmpops macro
+        callc _compstr
+        #em
+cmoppntr macro
+          callc _comppntr
+          #em
+substr_op macro
+         callc _substrop
+         #em
+concat_op  macro
+          callc _concat
+          add sp,ptrstackbytes     ; remove top stack item
+          #em
+
+add_sp macro
+       add sp,#1
+       #em
+
+push_ax macro
+        push ax
+        #em
+
+cmp_ax macro
+       cmp ax,#1
+       #em
+
+int18 macro
+      int 18h
+     #em
+
+int21 macro
+      int 21h
+      #em
+
+mov_ax_sp macro
+      mov ax,sp
+      #em
+
+mov_bx_sp macro mov bx,sp #em
+mov_bp_sp macro mov bp,sp #em
+add_ax macro
+       add ax,#1
+       #em
+push_ss macro
+        push ss
+        #em
+
+mov_di_ax macro
+       mov di,ax
+       #em
+mov_es_dx macro
+          mov es,dx
+          #em
+
+pop_es_di macro
+          pop es:[di+#1]
+          #em
+add_di macro
+       add di,#1
+       #em
+add_si macro add si,#1 #em
+push_es_si macro push es:[si+#1] #em
+mov_si_ax macro mov si,ax #em
+lea_ax macro lea ax,#1 #em
+cslea_ax macro lea ax,#1 #em
+pop_ax macro pop ax #em
+mov_ax macro mov ax,#1 #em
+push_bx macro push bx #em
+pop_bx macro pop bx #em
+
+push_bp macro push bp #em

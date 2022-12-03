@@ -1,0 +1,132 @@
+.TH "taxi" "1.0.0" "2016-2020" "The taxi Team!"
+.AD c 
+                               taxi man page
+.AD
+.SH "SYNOPSIS"
+.B taxi [options] [filename]...
+
+.SH "OPTIONS"
+
+ \fB\-\-conditions\fR      Print GPL3 redistribution conditions and exit
+ \fB\-b, \-\-root\-block\fR  Add external main root block
+ \fB\-d, \-\-debug\fR       Debug mode (run-time only)
+ \fB\-e, \-\-ext\-debug\fR   Set extended debug mode (pre-parsing)
+ \fB\-\-errors-list\fR     Print a complete errors list and exit
+ \fB\-\-exp=C\fR           Set C as floating-point numbers default exponent
+ \fB\-h, \-\-help\fR        Display this information and exit
+ \fB\-l, \-\-list\fR        List program (with indentation) and exit
+ \fB\-\-page=N\fR          Set N as the default printer page height
+ \fB\-\-purge\fR           Convert program to reserved mode (purging ticks)
+ \fB\-t, \-\-timing\fR      Display timing after execution
+ \fB\-\-tab=N\fR           Set N as tabulation width in -l/--list options
+ \fB\-\-verbose\fR         Add extra information to option -e/--ext-debug
+ \fB\-v, \-\-version\fR     Display the version banner and exit
+ \fB\-\-warranty\fR        Print warranty conditions from GPL3 and exit
+
+A [filename] can have any name or extension, and may be located anywhere in the system tree, provided the whole path is specified; preferred extension is '.alg'. Remember that, whenever a file is called within a program, the called file must be stored in the same directory, or it must be called along with the whole path. If more than one filename is specified, only the first will be executed; the others will be ignored.
+
+.SH "DESCRIPTION"
+
+\fBtaxi\fR means \fBT\fRonibin's \fBA\fRlgol si\fBX\fRty \fBI\fRnterpreter, and it's an implementation of ALGOL-60. ALGOL is an abbreviation of ALGOrithmic Language, and 1960 is the year when it was defined.
+
+\fBtaxi\fR uses by default the protocol of the DEC family (namely the AA-0196C-TK 1977 version), with addition of the ISO 1538-1984 (E) features (when not in contradiction with the DEC protocol). The DEC Algol-60 was chosen because it was robust and sufficiently adherent to the Algol-60 philosophy, with its own performant input/output procedures, different enough from the ISO 1538-1984 (E) ones, to let the both of them co-exist in \fBtaxi\fR.
+
+\fBtaxi\fR has a very wide functions list, for any mathematical calculation. It provides all ALGOL facility to input numbers, and the greater flexibility in the evaluation of arguments.
+
+\fBtaxi\fR was written in memory of \fBHeinz Rutishauser\fR, one of the creators of Algol and the author of the book "Description of Algol 60" (1967), today available as a pdf file.
+
+\fBtaxi\fR is distributed with a manual in pdf that explains the language, introduces to the ALGOL programming and presents also a brief history of the language.
+
+\fBtaxi\fR is a \fBUNIX\fR program, it's completely free and is distributed according to the GNU Public License version 3.
+
+Sustain my work! Donations are welcome through Paypal to tbin at libero dot it.
+
+.SH "INSTALLING \fBtaxi\fR"
+
+\fBWarning: taxi can be installed on UNIX systems only (any); on old Macs (9.x and lesser) and Windows it isn't even guaranteed to compile; there are many differences between UNIX and not-UNIX systems for it to happen, but if you can, you're welcome.\fR
+
+Installing \fBtaxi\fR is very easy; access a terminal (real or emulated) and unzip the package into a directory of your tree; the zip will unpack into a subdirectory named with the versioninig number, something like taxi.1.0.beta. Enter into this subdirectory, let's call it \fHtaxi/package/\fR. Take a look at the file custom.h and change what you feel it must be changed.
+
+Now, type \fBmake\fR; if you have gcc 3.x/4.x or later installed, it should compile without problems; if you don't have the gcc, you probably have to correct the sources where your compiler points to, but in general it's plain C for the gcc.
+
+After compilation, install the executable. If you want to install for every user, type \fBmake install\fR (as root) or \fBsudo make install\fR (as member of the sudoer group); that's all. If you want to install into your tree only, change the destination lines in the makefile and type \fImake install\fR (no need to become root).
+
+After installation, just to be sure \fBtaxi\fR is up and available, type 
+.br
+  taxi -h 
+.br
+or
+.br 
+  taxi -v
+.br
+to see the help and/or the version banners. If you see them, you're ready to go: \fBtaxi\fR works! Start developing your ALGOL programs!
+
+If you want to get a new pdf file of the manual, type \fBmake manual\fR in the \fHtaxi\fR source directory, and you will find a newly generated taxi_manual.pdf, provided you have groff and ps2pdf installed. (If not, write to me, and I will send you the pdf manual for free.)
+
+.SH "OPTIONS"
+
+Legal and informative options need no comment, so here's a survey of the other available options:
+
+\fB\-b/\-\-root\-block\fR (Root block) 
+.br
+Add an implicit outer root block, enclosed by BEGIN/END plus final dot; useful if the source has not its own root block. (Some ALGOL versions didn't require the dot as the last character of the program, while the DEC version, and \fHtaxi\fR do).
+
+\fB\-d (Debug)/\-\-debug\fR
+.br
+\fB\-e/\-\-ext\-debug\fR (Extended debug)
+.br
+The debug feature helps the programmer to see the full exploited running execution, to detect where the program fails. The debug is divided in two phases, each driven by its option. Let's see them in detail.
+
+.br
+Option -e/--ext-debug enables the debugging for the pre-processing phase, showing all procedures schemes and relations and the labels system; if the option --verbose is also used, tables of the structures inner references (IF-THEN-ELSE, FOR, WHILE, BEGIN-END) will be shown. At the end, option -d/--debug is implicitly enabled.
+.br
+Option -d/--debug enables the printing in inverse colours of the lines that it is about to execute, along with the regular output of the program in normal characters. This allows the programmer the inspection of the flow of the program and therefore its behaviour. The debugger is not aimed to be used in normal executions, even if it gives useful information about the program itself, because it clutters up the output, destroying the programmer's design.
+.br
+Note: the printed lines of the debugger are those already parsed by the pre-processor, and thus they are written in meta-language, not in pure ALGOL; besides, comments are ignored. It needs some extra skill to learn reading quickly the meta-language. And I give you a personal advice: use a terminal with backward scrolling abilities. 
+
+\fB\-\-errors\-list\fR (System messages)
+.br
+This option is useful only if you want to know the error codes associated with the error messages or to see the list of all the error messages and their number code present in the system. (For example, for the usage of the procedure FAULT.) This option can be typed also as --errors and as --errorslist.
+
+\fB\-\-exp=C\fR (Default exponent)
+.br
+Choose the preferred character C for the exponentiation figure, to be chosen among the traditional symbol \fB&\fR of the DEC ALGOL, the alternate character \fB@\fR or the modern letter \fBE\fR. In case of double-precision numbers, \fB&\fR and \fB@\fR will be doubled (\fB&&\fR and \fB@@\fR respectively), while \fBE\fR will not. Default is \fB&\fR. If you should need to specify the \fB&\fR or \fB@\fR characters, you may want to escape it, when it is significant for the underlying shell (for instance, \fB&\fR for bash).
+
+\fB\-l/\-\-list\fR (List program with rough indenting and exit)
+.br
+Print a proper indented listing of the program, with all the comments, and exit. The indentation is rough: three blanks ahead after each BEGIN, three blanks backward for each END, one void line after each END. \fBBeware: some programs may not be displayed well since the indentation follows a heuristic algorithm\fR. The tabulation is by default 3 characters wide, but this can be changed using the option --tab=N, where N is an integer defining the chosen tab width.
+
+\fB\-\-page=N\fR (Paging)
+.br
+Define the page height to use; the paging features depend on a value which is the maximum number of lines your current printer can put on a single page as simple text (no graphics). \fBtaxi\fR uses the value 68 (which is the value of my printer), stored in the variable DEFPAGEHEIGHT (in custom.h). In case your printer supports a different value, you are invited either to change DEFPAGEHEIGHT and recompile or to use the option --page, which sets N as the default. If N is less than or equal to zero, nothing happens.
+
+\fB\-\-purge\fR (Reserved mode)
+.br
+Load the program and print it to standard output depriving it of the ticks in the source (i.e. set it to \fIreserved mode\fR), but preserving the ticks themselves into comments and strings. The file output can be captured and put into another file for direct execution by \fHtaxi\fR, e.g. 
+ 
+ taxi --purge file.a60 > file.alg.
+
+The conversion removes only the ticks, but you should verify the source integrity after conversion, because the removal is performed heuristically.
+
+\fB\-t/\-\-timing\fR (Print timing)
+.br
+This option prints a timing string indicating the elapsed time of the program execution. In the case of CALL, it prints the total time starting from the first program. The time is scaled: if less than 1 second, it is printed in milliseconds (MSECS); if less than 1 minute, it is printed in seconds (SECS); if less than 1 hour, it is printed in minutes and seconds MM:SS (with the total seconds); otherwise, it is printed in hours HH:MM:SS (with the total seconds).
+
+\fB\-\-tab=N\fR (Listing tabulation)
+.br
+see options -l/--list.
+
+\fB\-\-verbose\fR (Debugging option)
+.br
+see options -e/-d/--debug.
+
+.SH "SEE ALSO"
+The manual of taxi contains some reference for extra documentation. It also contains all data about differences, problems, enhancements and restrictions of taxi. Please, refer to it.
+
+.SH "BUGS"
+Address bugs you may find to <ing dot antonio dot maschio at gmail dot com>; include the Operating System identification with version, the gcc version you used to compile, the program you were running, the extract of the execution (if you can copy from the terminal) in a txt file, and/or a brief description of what you were about to do and what you got instead. English or Italian, please. A mixture of the two languages is accepted, of course! ;-)
+
+
+.SH "HISTORY"
+\fBtaxi\fR appeared in 2020 for the first time. Written by Antonio Maschio, an engineer in Montebelluna (TV), Italy, with essential help (in the design phase) from Ian Jones, tester-programmer in Bristol, England.
+

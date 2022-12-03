@@ -1,0 +1,46 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:776: checking for bison
+configure:837: checking for a BSD compatible install
+configure:900: checking for xmkmf
+configure:929: checking how to run the C preprocessor
+configure:950: cc -E  conftest.c >/dev/null 2>conftest.out
+configure:1013: checking for X
+configure:1080: cc -E  conftest.c >/dev/null 2>conftest.out
+configure:1156: cc -o conftest    conftest.c -lXt  1>&5
+configure: In function 'main':
+configure:1152:1: warning: implicit declaration of function 'XtMalloc' [-Wimplicit-function-declaration]
+ ${x_direct_test_function}()
+ ^~~~~~~~
+configure:1253: checking for X11 header files
+configure:1261: cc -E  conftest.c >/dev/null 2>conftest.out
+configure:1298: checking for X11 library archive
+configure:1300: checking for main in -lXaw
+configure:1315: cc -o conftest    conftest.c -lXaw   1>&5
+/usr/bin/ld: cannot find -lXaw
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 1308 "configure"
+#include "confdefs.h"
+
+int main() {
+main()
+; return 0; }
+configure:1347: checking for main in -lXwindow
+configure:1362: cc -o conftest    conftest.c -lXwindow   1>&5
+/usr/bin/ld: cannot find -lXwindow
+collect2: error: ld returned 1 exit status
+configure: failed program was:
+#line 1355 "configure"
+#include "confdefs.h"
+
+int main() {
+main()
+; return 0; }
+configure:1401: checking for stdlib.h
+configure:1411: cc -E  conftest.c >/dev/null 2>conftest.out
+configure:1401: checking for unistd.h
+configure:1411: cc -E  conftest.c >/dev/null 2>conftest.out
+configure:1401: checking for string.h
+configure:1411: cc -E  conftest.c >/dev/null 2>conftest.out

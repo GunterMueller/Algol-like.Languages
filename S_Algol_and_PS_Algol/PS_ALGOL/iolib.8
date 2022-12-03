@@ -1,0 +1,360 @@
+TITLE 'iolib '
+PAGE 55
+; io lib .8
+iolib segment byte public 'code'
+; LIBRARY OF ASSEMBLER ROUTINES TO PERFORM LOW LEVEL IO
+jmp iolibtest
+
+; name VIDEOID
+; Detects various video subsystems and monitors
+; Caller Turboc
+; void VIDEOID(VIDstruct)
+;struct{ char Videosubsystem,display;} *VIDstruct[2];
+;
+;	subsystem id values
+;
+;	0 = none
+;	1 = mda
+;	2 = cga
+;   3 = ega
+;   4 = mcga
+;   5 = vga
+;   80H = hgc
+
+;   display type
+;	0 none
+;	1 mda
+;	2 cga
+;	3 ega
+;   4 ps2 mono
+;   5 ps2 colour
+
+;  values in VIDstruct[0] indicate the default system
+
+ARGpVID EQU word ptr [bp+4]
+VIDstruct STRUC
+Video0Type db ?
+Display0Type db ?
+Video1Type db ?
+Display1Type DB ?
+VIDstruct ENDS
+Device0 EQU word ptr Video0Type [di]
+Device1 equ word ptr Video1Type [di]
+mda equ 1
+cga equ 2
+ega equ 3
+mcga equ 4
+vga equ 5
+hgc equ 80h
+mdadisplay equ 1
+cgadisplay equ 2
+
+
+
+
+ public _MOUSEPRES,_MOUSESHOW,_MOUSEHIDE,_MOUSEX,_MOUSEY,_MOUSEBUT
+_MOUSEBUT PROC far
+	mov ax,3
+	int 33h
+	mov ax,bx
+	ret
+_MOUSEBUT ENDP
+
+
+_MOUSEPRES PROC far
+	mov ax,0
+	int 33h
+	ret
+_MOUSEPRES ENDP
+
+
+_MOUSESHOW PROC far
+	mov ax,1
+	int 33h
+	ret
+_MOUSESHOW ENDP
+
+
+_MOUSEHIDE PROC far
+	mov ax,2
+	int 33h
+	ret
+_MOUSEHIDE ENDP
+
+_MOUSEX PROC far
+	mov ax,3
+	int 33h
+	mov ax,cx
+	ret
+_MOUSEX ENDP
+
+
+_MOUSEY PROC far
+	mov ax,3
+	int 33h
+	mov ax,dx
+	ret
+_MOUSEY ENDP
+public _VGETCH
+_VGETCH PROC far
+    ; return character under cursor
+    mov ah,8
+	mov bh,0
+	int 10h
+	ret
+_VGETCH ENDP
+
+_ASMWRITE PROC  far
+    public _ASMWRITE
+    push bx
+	push cx
+	push dx
+	push ds
+    mov bx,[bp+4]
+    mov cx,[bp+10]
+    mov ah,40h
+
+	lds dx,[bp+6]
+    int 21h
+    jnc endwrite
+    neg ax
+endwrite:
+    pop ds
+	pop dx
+	pop cx
+	pop bx
+    ret
+_ASMWRITE endp
+
+_ASMREAD PROC   far
+    public _ASMREAD
+    push bx
+	push cx
+	push dx
+	push ds
+    mov bx,[bp+4]
+    mov cx,[bp+10]
+    mov ah,3fh
+
+	lds dx,[bp+6]
+    int 21h
+    jnc endread
+    neg ax
+endread:
+    pop ds
+	pop dx
+	pop cx
+	pop bx
+    ret
+_ASMREAD endp
+
+
+_ASMCREATE PROC  far
+    public _ASMCREATE
+    push bx
+	push cx
+	push dx
+	push ds
+    mov cx,[bp+8]
+    mov ah,3ch
+
+	lds dx,[bp+4]
+    int 21h
+    jnc endcr
+    neg ax
+endcr:
+    pop ds
+	pop dx
+	pop cx
+	pop bx
+    ret
+_ASMCREATE endp
+
+iolib ends
+
+
+
+
+;port addresses
+index equ 3b4h
+cntrl equ 3b8h
+config equ 3bfh
+; control codes
+scrn_on equ 8
+grph equ 2
+textmode equ 20h
+xcode segment public 'code'
+	assume cs,ds:xcode
+
+iolibtest :
+    call _TMODE
+	int 20h
+gtable db 35h,2dh,2eh,7,5bh,2,57h,57h,2,3,0,0
+ttable db 61h,50h,52h,0fh,19h,6,19h,19h,2,0dh,0bh,0ch
+public _GMODE
+;	GMODE puts 6845 into graphics mode
+_GMODE proc far
+	push es
+	push ds
+	mov ax,cs
+	mov ds,ax
+	mov al ,grph
+	mov si, offset gtable
+	mov bx,0
+	mov cx,4000h
+	call setmd
+	pop ds
+	pop es
+	ret
+_GMODE endp
+
+public _TMODE
+;	TMODE puts 6845 into text mode
+_TMODE proc far
+	push es
+	push ds
+	mov ax,cs
+	mov ds,ax
+	mov al ,textmode
+	mov si,offset ttable
+	mov bx,720h
+	mov cx,2000
+	call setmd
+	pop ds
+	pop es
+	ret
+_TMODE endp
+setmd proc near
+; si = parameter table
+; cx number of words cleared
+; bx = blank value
+   push ds
+   push es
+   push ax
+   push bx
+   push cx
+   push ax
+   ; set config bit
+   mov dx,config
+   mov al,1
+   out dx,al
+   pop ax
+
+   ; change mode with screen off
+   mov dx,cntrl
+   out dx,al
+   ; init 6845
+   mov ax,ds
+   mov es,ax
+   mov dx,index
+   mov cx,12   ; 12 params
+   xor ah,ah   ; start at reg 0
+parms:
+   mov al,ah
+   out dx,al  ; out register num
+   inc dx
+   lodsb
+   out dx,al
+   inc ah    ; next reg
+   dec dx
+   loop parms
+   pop cx    ; clear buffer
+   mov ax,0b00h
+   cld
+   mov es,ax
+   xor di,di
+   pop ax
+   jmp switchon
+   rep stosw
+   ; scrn on
+   switchon:
+   mov dx,cntrl
+   pop ax
+   add al,scrn_on
+   out dx,al
+   pop es
+   pop ds
+   ret
+setmd endp
+
+
+Bytesperline equ 90
+OriginOffset equ 0
+VideoBufferSeg EQU 0b000h
+
+
+pixeladdrhgc proc near   ; see page 95 of Video Systems
+    mov cl,bl
+	shr ax,1
+	rcr bx,1
+	shr ax,1
+	rcr bx,1
+	shr bx,1
+	mov ah, Bytesperline
+	mul ah
+	add bx,ax
+	add bx,OriginOffset
+	mov ax,VideoBufferSeg
+	mov es,ax
+	and cl,7
+	xor cl,7
+	mov ah, 1
+	ret
+pixeladdrhgc endp
+
+;  SETPIXELHGC(x,y,n) int x,y;
+;					  int n ; /* colour */
+argx equ word ptr [bp+6]
+argy equ word ptr [bp+8]
+argn equ byte ptr [bp+10]
+public _SETPIXELHGC
+    db 'setpixelhgc'
+_SETPIXELHGC proc far
+    push bp
+	mov bp,sp
+	mov ax,argy
+	mov bx,argx
+	call pixeladdrhgc
+	mov al ,argn
+	shl ax,cl
+	jmp word ptr cs: setpixelop04
+setpixelop04 dw replacepixelop04
+replacepixelop04: not ah
+	and es:[bx],ah
+	or es:[bx],al
+	jmp short l02
+
+andpixelop04: not ah
+	or al,ah
+	and es:[bx],al
+	jmp short l02
+
+orpixelop04: or es:[bx],al
+	jmp short l02
+
+xorpixelop04: xor es:[bx],al
+l02: mov sp,bp
+	pop bp
+	ret
+
+_SETPIXELHGC endp
+ public _BIOSTEXTMODE
+_BIOSTEXTMODE proc far
+	push bp
+	mov bp,sp
+	push si
+	push di
+    mov ax,7
+	int 10h
+
+	pop di
+	pop si
+	mov sp,bp
+	ret
+     endp
+
+xcode ENDS
+
+
+ end
+

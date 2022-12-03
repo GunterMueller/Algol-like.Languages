@@ -1,0 +1,72 @@
+
+  |              _|
+_  _|         
+  |  __ \   \ /   |
+  |   _\ |   \    |
+ _|  \___| _/_\  _| [1;31mT[1;monibin's [1;31mA[1;mlgol si[1;31mX[1;mty [1;31mI[1;mnterpreter
+
+Algol 60 boy Interpreter, based on the DEC-10/20 ALGOL, with ISO integrations.
+version 1.0.Alpha.geographic (built on Jan  4 2021, at 09:30:06)
+by Antonio Maschio (tonibin) <ing dot antonio dot maschio at gmail dot com>.
+Copyleft (C) 2016-2021 - DEC AA-0196C-TK - ISO 1538-1984 (E)
+
+Welcome, user! I hope you'll like this program.
+Here's some information about it and its license...
+Usage: taxi [options] [filename]
+
+Options:
+      --conditions   Print GPL3 redistribution conditions and exit
+  -c  --cdc          Enable interpreting channel 60/61 as 0/1 (CDC)
+  -b  --root-block   Add external main root block
+  -d  --debug        Debug mode (run-time only)
+  -e  --ext-debug    Set extended debug mode (preparsing)
+      --errors-list  Print a complete errors list and exit
+      --exp=C        Set C as floating-point numbers default exponent
+  -h  --help         Display this information and exit
+  -l  --list         List program (with indentation) and exit
+      --page=N       Set N as the default printer page height
+      --purge        Convert program to reserved mode (purging ticks)
+  -t  --timing       Display timing after execution
+      --tab=N        Set N as tabulation width in -l/--list options
+      --verbose      Add extra information to option -e/--ext-debug
+  -v  --version      Display the version banner and exit
+      --warranty     Print warranty conditions from GPL3 and exit
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http:/www.gnu.org/licenses/>.
+Email bugs reports to <ing dot antonio dot maschio at gmail dot com>.
+Consult the man/info pages or the manual to know taxi in detail.
+Come on board and drive this taxi! It's GPL! Enjoy!
+
+This free software comes with ABSOLUTELY NO WARRANTY; for details about this,
+type 'taxi --warranty'.  You are welcome to redistribute it under certain
+conditions; type 'taxi --conditions' for details.
+This software is released under the terms of the GNU General Public License 3.
+
+Notes:
+- to compile type 'make' as user in taxi' source directory.
+- to install type 'make install' as root after compiling.
+  (but I'm sure you know better than me what to do!)
+
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT
+WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF
+THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME
+THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+You may make, run and propagate covered works that you do not convey,
+without conditions so long as your license otherwise remains in force.
+You may convey covered works to others for the sole purpose of having
+them make modifications exclusively for you, or provide you with
+facilities for running those works, provided that you comply with the
+terms of this License in conveying all material for which you do not
+control copyright. Those thus making or running the covered works for
+you must do so exclusively on your behalf, under your direction and
+control, on terms that prohibit them from making any copies of your
+copyrighted material outside their relationship with you.
+
+It's GPL. Enjoy!
+

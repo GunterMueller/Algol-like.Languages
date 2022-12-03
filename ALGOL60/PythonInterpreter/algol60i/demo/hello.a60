@@ -1,0 +1,6 @@
+begin
+   integer i;
+   i := 1960;
+   outinteger (1, i);
+   outstring(1, `Algol60 was born!')
+end

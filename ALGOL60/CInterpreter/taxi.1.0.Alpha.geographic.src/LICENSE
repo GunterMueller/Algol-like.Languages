@@ -1,0 +1,48 @@
+LICENSE GUIDE
+-------------
+
+This software is free, and can be used and compiled freely on any
+Operating System you're able to compile it with. The programs you
+develop in Algol remain yours, but the source code of taxi, which
+interprets and run these Algol programs, remains of mine.
+
+The source code of taxi is subject to the GPL license version 3.
+
+If you want to quote the author of this program in the code parts
+or functions you need to copy in your own code, use the following:
+
+  "this <part of> code comes from taxi, the Algol 60 interpreter,
+  version <version>, dated <date>, 
+  developed by Antonio Maschio, Montebelluna, Italy
+  @ ing dot antonio dot maschio at gmail dot com"
+
+Add, if necessary, why you copy the <part of> code and where you
+put it. Then send me a mail to notify me. I'd be glad. No charge
+for this, the code is GPL.
+
+CONDITIONS
+You may make, run and propagate covered works that you do not convey,
+without conditions so long as your license otherwise remains in force.
+You may convey covered works to others for the sole purpose of having
+them make modifications exclusively for you, or provide you with
+facilities for running those works, provided that you comply with the
+terms of this License in conveying all material for which you do not
+control copyright. Those thus making or running the covered works for
+you must do so exclusively on your behalf, under your direction and
+control, on terms that prohibit them from making any copies of your
+copyrighted material outside their relationship with you.
+
+WARRANTY
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT
+WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF
+THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME
+THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+Update: 12 February 2019
+Antonio Maschio
+<ing dot antonio dot maschio at gmail dot com>
+
